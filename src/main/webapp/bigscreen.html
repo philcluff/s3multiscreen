@@ -1,0 +1,131 @@
+<html>
+  <head>
+    <title>S3 Video Multiscreen</title>
+    <link href="//philcluff.co.uk/video-js/video-js.min.css" rel="stylesheet">
+    <script src="//philcluff.co.uk/video-js/video.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script>videojs.options.flash.swf = "//philcluff.co.uk/video-js/video-js.swf";</script>
+  </head>
+  <body style="font-family: sans-serif; background: #222; color: #aaa;" onload="getNextVideo();">
+    <center>
+      <h1>S3 Video Multiscreen</h1>
+
+      <table border="1">
+	<tr>
+	  <td>
+	    <video id="player_1" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	  <td>
+	    <video id="player_2" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	  <td>
+	    <video id="player_3" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	  <td>
+	    <video id="player_4" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>
+	    <video id="player_5" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	  <td colspan="2" rowspan="2"></td>
+	  <td>
+	    <video id="player_6" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>
+	    <video id="player_7" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+
+	  <td>
+	    <video id="player_8" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>
+	    <video id="player_9" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	  <td>
+	    <video id="player_10" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	  <td>
+	    <video id="player_11" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	  <td>
+	    <video id="player_12" class="video-js vjs-default-skin"
+		   controls preload="auto" width="400" height="225"
+		   data-setup='{ "loop": false, "controls": false, "autoplay": false, "preload": "auto" }'>
+	    </video>	    
+	  </td>
+	</tr>
+
+      </table>
+
+
+      <script>
+
+      // Use JQuery to load the next video from the random API.
+      // The random API returns a pre-auth URL as plain/text.
+      // Also setup callbacks for when the video loads (play) ends playing (load next video)
+      function getNextVideo() {
+        $.get("api/random", function(data) {
+          var player = videojs("player_1");
+          player.on("loadedmetadata", play);
+          player.on("ended", getNextVideo);
+          player.src(data);
+        });
+      }
+
+      function play() {
+          var player = videojs("player_1");
+          player.play();
+      }
+
+      function pause() {
+          var player = videojs("player_1");
+          player.pause();
+      }
+
+      </script>
+      <p><a href="#" onclick="getNextVideo();">Play Next Video</a> | <a href="#" onclick="play();">Play</a> | <a href="#" onclick="pause();">Pause</a></p>
+    </center>
+  </body>
+</html>
