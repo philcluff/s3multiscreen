@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+	<bean id="awsClientConfiguration" class="com.amazonaws.ClientConfiguration" />
+
+	<bean id="s3Client" class="com.amazonaws.services.s3.AmazonS3Client">
+		<property name="configuration" ref="awsClientConfiguration" />
+		<property name="endpoint" value="s3-eu-west-1.amazonaws.com" />
+	</bean>
+
+	<context:annotation-config />
+	<context:component-scan base-package="org.philcluff.multiscreen" />
+
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
+	<mvc:resources mapping="/**" location="classpath:/webapp/" />
+
+</beans>
