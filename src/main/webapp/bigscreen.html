@@ -6,7 +6,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script>videojs.options.flash.swf = "//philcluff.co.uk/video-js/video-js.swf";</script>
   </head>
-  <body style="font-family: sans-serif; background: #222; color: #aaa;" onload="getNextVideo();">
+  <body style="font-family: sans-serif; background: #222; color: #aaa;" onload="getNextVideo('player_1');">
     <center>
       <h1>S3 Video Multiscreen</h1>
 
@@ -105,9 +105,9 @@
       // Use JQuery to load the next video from the random API.
       // The random API returns a pre-auth URL as plain/text.
       // Also setup callbacks for when the video loads (play) ends playing (load next video)
-      function getNextVideo() {
+      function getNextVideo(player_name) {
         $.get("api/random", function(data) {
-          var player = videojs("player_1");
+          var player = videojs(player_name);
           player.on("loadedmetadata", play);
           player.on("ended", getNextVideo);
           player.src(data);
@@ -115,13 +115,19 @@
       }
 
       function play() {
-          var player = videojs("player_1");
+          var player = this;
           player.play();
       }
 
       function pause() {
-          var player = videojs("player_1");
+          var player = this;
           player.pause();
+      }
+
+      function populateAllPlayers() {
+          for (var i=1;i<=12;i++) {
+                getNextVideo("player_" + i);              
+          }
       }
 
       </script>

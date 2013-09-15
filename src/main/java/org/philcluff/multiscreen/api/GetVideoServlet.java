@@ -1,6 +1,7 @@
 package org.philcluff.multiscreen.api;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +24,7 @@ public class GetVideoServlet {
 
     private static String BUCKET;
     private AmazonS3Client s3;
+    private List<String> keysReturnedRecently = new ArrayList<String>();
 
     @Autowired
     public void GetVideoServlet(AmazonS3Client s3) {
@@ -43,34 +45,17 @@ public class GetVideoServlet {
     public void getRandomVideoUri(final HttpServletRequest req,
             final HttpServletResponse resp) throws Exception {
 
-        // Get the first 1000 files from S3 and shuffle them
-        List<S3ObjectSummary> s3objects = s3.listObjects(BUCKET)
-                .getObjectSummaries();
-        Collections.shuffle(s3objects);
+        S3ObjectSummary object = getVideoOfProfile("flv_avc1_high");
 
-        for (S3ObjectSummary object : s3objects) {
-            // Find the first video of the right profile in the list
-            if (object.getKey().contains("flv_avc1_low")) {
-                System.out.println(object.getKey());
-
-                // Generate a one-time URL for the file, and stream it back.
-                Date expiration = new java.util.Date();
-                long msec = expiration.getTime();
-                msec += 1000 * 60 * 60; // 1 hour.
-                expiration.setTime(msec);
-
-                GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(
-                        BUCKET, object.getKey());
-                generatePresignedUrlRequest.setMethod(HttpMethod.GET);
-                generatePresignedUrlRequest.setExpiration(expiration);
-                URL url = s3.generatePresignedUrl(generatePresignedUrlRequest);
-
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.setContentType("text/plain");
-                resp.getWriter().write(url.toString());
-                System.out.println("Generated One-Time auth URL: " + url.toString());
-                return;
-            }
+        // Found one! 200.
+        if (object != null) {
+            URL url = getPresignedUrlForObject(object);
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("text/plain");
+            resp.getWriter().write(url.toString());
+            System.out
+                    .println("Generated One-Time auth URL: " + url.toString());
+            return;
         }
 
         // Otherwise, 404 :(
@@ -79,5 +64,52 @@ public class GetVideoServlet {
         resp.getWriter().write("Could not find a valid video.");
         return;
 
+    }
+
+    // Generate a one-time URL for the object provided
+    private URL getPresignedUrlForObject(S3ObjectSummary object) {
+        Date expiration = new java.util.Date();
+        long msec = expiration.getTime();
+        msec += 1000 * 60 * 60; // 1 hour.
+        expiration.setTime(msec);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(
+                BUCKET, object.getKey());
+        generatePresignedUrlRequest.setMethod(HttpMethod.GET);
+        generatePresignedUrlRequest.setExpiration(expiration);
+        URL url = s3.generatePresignedUrl(generatePresignedUrlRequest);
+        return url;
+    }
+
+    // Get the first 1000 files from S3 and shuffle them, returning the first which matches
+    // the pattern requested. Now with some limited & nasty duplicate protection.
+    private S3ObjectSummary getVideoOfProfile(String profile) {
+        List<S3ObjectSummary> s3objects = s3.listObjects(BUCKET)
+                .getObjectSummaries();
+        Collections.shuffle(s3objects);
+
+        S3ObjectSummary fallback = null;
+        for (S3ObjectSummary object : s3objects) {
+            // Find the first video of the right profile in the list
+            if (object.getKey().endsWith(profile + ".mp4")) {
+                // Poor Man's way of checking if we've sent this one before
+                if (keysReturnedRecently.contains(object.getKey())) {
+                    fallback = object;
+                    System.out.println("Returned this video recently, trying to find an alternative.");
+                    continue;
+                }
+                System.out.println(object.getKey());
+                keysReturnedRecently.add(object.getKey());
+                return object;
+            }
+        }
+
+        if (fallback != null) {
+            System.out.println("Warning! returning something we returned earlier!");
+            return fallback;
+        }
+
+        System.out.println("Error - Failed to find a valid video");
+        return null;
     }
 }
